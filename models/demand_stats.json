@@ -1,0 +1,9 @@
+{
+  "demand_mean": 124.64967,
+  "demand_std": 114.70146844378118,
+  "demand_q25": 35.0,
+  "demand_q50": 81.0,
+  "demand_q75": 190.0,
+  "demand_min": 5.0,
+  "demand_max": 802.0
+}

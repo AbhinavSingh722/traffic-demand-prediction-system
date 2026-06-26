@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Distribution
+*.egg-info/
+dist/
+build/
+
+# Logs
+*.log
+
+# Large model file (341MB - excluded from git, not needed for ensemble)
+# The ensemble only uses lightgbm.pkl and xgboost.pkl
+models/random_forest.pkl
+
+# NOTE: Do NOT ignore other models/*.pkl — needed for Streamlit Cloud
+# NOTE: Do NOT ignore data/*.csv — needed for reproducibility

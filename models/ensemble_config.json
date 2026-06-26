@@ -1,0 +1,14 @@
+{
+  "ensemble_type": "weighted_average",
+  "models": {
+    "lgbm": {
+      "weight": 0.55,
+      "file": "lightgbm.pkl"
+    },
+    "xgb": {
+      "weight": 0.45,
+      "file": "xgboost.pkl"
+    }
+  },
+  "formula": "prediction = 0.55 \u00d7 LightGBM + 0.45 \u00d7 XGBoost"
+}
