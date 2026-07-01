@@ -2,6 +2,7 @@
 
 > **Industry-level ML Pipeline** for predicting urban traffic demand using ensemble learning.
 > Built for **Innovexa Catalyst** | Achieves **96%+ R2 accuracy** with LightGBM + XGBoost ensemble.
+> 🌐 **Live Demo:** [Traffic Demand Prediction System](https://traffic-demand-prediction-system-8wsccguc27usbha2w5u7jg.streamlit.app/)
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.29-red)
