@@ -170,9 +170,16 @@ st.markdown("""
         background: linear-gradient(180deg, #0f0c29 0%, #1a1a2e 100%);
     }
 
-    /* Capitalize sidebar nav labels */
-    [data-testid="stSidebar"] [data-testid="stSidebarNav"] span {
-        text-transform: capitalize !important;
+    /* Rename sidebar nav labels */
+    [data-testid="stSidebarNav"] li:first-child span {
+        font-size: 0 !important;
+    }
+    [data-testid="stSidebarNav"] li:first-child span::after {
+        content: "🚦 Traffic Predictor";
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    [data-testid="stSidebarNav"] span {
         font-weight: 600 !important;
     }
 
