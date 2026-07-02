@@ -170,11 +170,30 @@ st.markdown("""
         background: linear-gradient(180deg, #0f0c29 0%, #1a1a2e 100%);
     }
 
+    /* Capitalize sidebar nav labels */
+    [data-testid="stSidebar"] [data-testid="stSidebarNav"] span {
+        text-transform: capitalize !important;
+        font-weight: 600 !important;
+    }
+
     [data-testid="stSidebar"] .stSelectbox label,
     [data-testid="stSidebar"] .stDateInput label,
     [data-testid="stSidebar"] .stTimeInput label {
         color: #a8b2d1 !important;
         font-weight: 500;
+    }
+
+    /* Animated background gradient */
+    .stApp > header + div {
+        background: linear-gradient(135deg, #0a0a1a 0%, #0e1117 40%, #131336 70%, #0e1117 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
 
     /* Footer */
