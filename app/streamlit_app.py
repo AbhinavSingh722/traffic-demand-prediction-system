@@ -190,6 +190,13 @@ st.markdown("""
         font-weight: 500;
     }
 
+    /* Separate deploy header from content */
+    header[data-testid="stHeader"] {
+        border-bottom: 1px solid rgba(102,126,234,0.15);
+        background: rgba(10,10,26,0.95) !important;
+        backdrop-filter: blur(10px);
+    }
+
     /* Animated background gradient */
     .stApp > header + div {
         background: linear-gradient(135deg, #0a0a1a 0%, #0e1117 40%, #131336 70%, #0e1117 100%);

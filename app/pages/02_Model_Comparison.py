@@ -26,6 +26,36 @@ st.markdown("""
     .stApp { font-family: 'Inter', sans-serif; }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
+
+    /* Rename sidebar nav */
+    [data-testid="stSidebarNav"] li:first-child span { font-size: 0 !important; }
+    [data-testid="stSidebarNav"] li:first-child span::after {
+        content: "🚦 Traffic Predictor"; font-size: 0.875rem; font-weight: 600;
+    }
+    [data-testid="stSidebarNav"] span { font-weight: 600 !important; }
+
+    /* Sidebar background */
+    [data-testid="stSidebar"] { background: linear-gradient(180deg, #0f0c29 0%, #1a1a2e 100%); }
+
+    /* Separate deploy header from content */
+    header[data-testid="stHeader"] {
+        border-bottom: 1px solid rgba(102,126,234,0.15);
+        background: rgba(10,10,26,0.95) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    /* Animated background */
+    .stApp > header + div {
+        background: linear-gradient(135deg, #0a0a1a 0%, #0e1117 40%, #131336 70%, #0e1117 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+    }
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
     .metric-box {
         background: linear-gradient(145deg, #1a1a2e, #16213e);
         border: 1px solid rgba(255,255,255,0.08);
@@ -41,6 +71,26 @@ st.markdown("""
     .best-badge { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; padding: 3px 12px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; }
 </style>
 """, unsafe_allow_html=True)
+
+# -- Sidebar Info --
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("### 📊 About This Page")
+    st.markdown("""
+    Compare all 4 trained models:
+    - **Random Forest** (baseline)
+    - **XGBoost** (boosting)
+    - **LightGBM** (boosting)
+    - **Ensemble** (weighted blend)
+    """)
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align:center; color:#4a5568; font-size:0.75rem;">
+        <p><strong>Ensemble Formula</strong></p>
+        <p>55% LightGBM + 45% XGBoost</p>
+        <p>R² Accuracy: 98.39%</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # -- Hardcoded model data (always available, matches CSV) --
 MODEL_DATA = {
