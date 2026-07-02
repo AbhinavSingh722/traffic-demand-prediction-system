@@ -211,14 +211,12 @@ st.markdown("""
         font-weight: 600 !important;
     }
     /* Remove divider line below nav */
-    [data-testid="stSidebarNav"] + div,
-    [data-testid="stSidebarNav"]::after {
-        display: none !important;
-    }
     [data-testid="stSidebarNav"] {
         border-bottom: none !important;
         margin-bottom: 4px !important;
     }
+    [data-testid="stSidebarNav"] ul { border-bottom: none !important; }
+    [data-testid="stSidebarNav"]::after { display: none !important; }
 
     /* Sidebar labels */
     [data-testid="stSidebar"] .stSelectbox label,
