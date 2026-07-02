@@ -207,7 +207,17 @@ st.markdown("""
         font-weight: 600;
     }
     [data-testid="stSidebarNav"] span {
+        font-size: 0.875rem !important;
         font-weight: 600 !important;
+    }
+    /* Remove divider line below nav */
+    [data-testid="stSidebarNav"] + div,
+    [data-testid="stSidebarNav"]::after {
+        display: none !important;
+    }
+    [data-testid="stSidebarNav"] {
+        border-bottom: none !important;
+        margin-bottom: 4px !important;
     }
 
     /* Sidebar labels */
