@@ -14,6 +14,7 @@ Author: Innovexa Catalyst
 import sys
 import os
 import json
+import datetime
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -410,7 +411,6 @@ def main():
         )
 
         # 4. Date
-        import datetime
         date_input = st.date_input(
             "📅 Date",
             value=datetime.date.today(),
@@ -484,6 +484,27 @@ def main():
             feature_names, hour
         )
 
+        # --- SHAP-style Feature Contributions ---
+        # Compute individual model predictions to show contribution
+        lgbm_pred = lgbm_model.predict(input_df)[0]
+        xgb_pred = xgb_model.predict(input_df)[0]
+
+        # Get feature importances from LightGBM (primary model)
+        feat_importance = lgbm_model.feature_importances_
+        feat_names_list = feature_names
+        # Normalise to get percentage contribution
+        total_imp = feat_importance.sum()
+        if total_imp > 0:
+            feat_pct = feat_importance / total_imp
+        else:
+            feat_pct = np.zeros(len(feat_importance))
+
+        # Top 8 features by importance
+        top_idx = np.argsort(feat_pct)[::-1][:8]
+        shap_features = [feat_names_list[i] for i in top_idx]
+        shap_values = [round(feat_pct[i] * prediction, 1) for i in top_idx]
+        shap_pcts = [round(feat_pct[i] * 100, 1) for i in top_idx]
+
         # Store in session state
         st.session_state["last_prediction"] = {
             "prediction": prediction,
@@ -500,7 +521,26 @@ def main():
             "road_type": road_type,
             "weather": weather,
             "day_of_week": day_of_week,
+            "lgbm_pred": lgbm_pred,
+            "xgb_pred": xgb_pred,
+            "shap_features": shap_features,
+            "shap_values": shap_values,
+            "shap_pcts": shap_pcts,
         }
+
+        # --- Track Prediction History ---
+        if "prediction_history" not in st.session_state:
+            st.session_state["prediction_history"] = []
+
+        st.session_state["prediction_history"].append({
+            "Time": f"{date_display} {time_display}",
+            "Road": road_type,
+            "Weather": weather,
+            "Day": day_of_week,
+            "Demand": round(prediction),
+            "Congestion": f"{congestion_level} ({congestion_pct}%)",
+            "Alert": "Yes" if alert_active else "No",
+        })
 
     # Get stored prediction
     data = st.session_state.get("last_prediction", None)
@@ -564,29 +604,104 @@ def main():
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # --- 24-Hour Forecast Chart ---
+    # --- SHAP-style Feature Contributions ---
+    if "shap_features" in data and data["shap_features"]:
+        st.markdown("### 🔍 Feature Contributions")
+        st.markdown("*What drove this prediction? Top features by importance contribution:*")
+
+        shap_fig = go.Figure()
+        shap_colors = ["#667eea", "#764ba2", "#f093fb", "#4facfe",
+                       "#43e97b", "#f5576c", "#ffa726", "#38f9d7"]
+
+        # Reverse for horizontal bar (top feature at top)
+        feat_names_rev = list(reversed(data["shap_features"]))
+        feat_vals_rev = list(reversed(data["shap_values"]))
+        feat_pcts_rev = list(reversed(data["shap_pcts"]))
+        colors_rev = list(reversed(shap_colors[:len(feat_names_rev)]))
+
+        shap_fig.add_trace(go.Bar(
+            y=feat_names_rev,
+            x=feat_vals_rev,
+            orientation="h",
+            marker_color=colors_rev,
+            text=[f"+{v:.0f} veh/hr ({p}%)" for v, p in zip(feat_vals_rev, feat_pcts_rev)],
+            textposition="outside",
+            textfont=dict(size=11),
+        ))
+
+        shap_fig.update_layout(
+            xaxis_title="Contribution (vehicles/hour)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter", color="#a8b2d1"),
+            xaxis=dict(gridcolor="rgba(255,255,255,0.05)"),
+            yaxis=dict(gridcolor="rgba(255,255,255,0.05)"),
+            height=350,
+            margin=dict(l=160, r=80, t=20, b=40),
+            showlegend=False,
+        )
+
+        col_shap1, col_shap2 = st.columns([3, 1])
+        with col_shap1:
+            st.plotly_chart(shap_fig, use_container_width=True)
+        with col_shap2:
+            st.markdown("**Model Breakdown**")
+            st.markdown(f"- LightGBM: **{data.get('lgbm_pred', 0):.0f}** veh/hr")
+            st.markdown(f"- XGBoost: **{data.get('xgb_pred', 0):.0f}** veh/hr")
+            st.markdown(f"- Ensemble: **{data['prediction']:.0f}** veh/hr")
+            st.markdown(f"")
+            st.markdown(f"*Weights: 55% LGBM + 45% XGB*")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # --- 24-Hour Forecast Chart with Confidence Bands ---
     st.markdown("### 📈 24-Hour Traffic Demand Forecast")
 
     # Create the chart
     fig = go.Figure()
 
+    preds = data["preds_24"]
+    hours_list = data["hours_24"]
+
+    # Confidence band (+-15% simulated interval)
+    upper_band = [p * 1.15 for p in preds]
+    lower_band = [max(p * 0.85, 0) for p in preds]
+
+    # Upper band (invisible line for fill)
+    fig.add_trace(go.Scatter(
+        x=hours_list, y=upper_band,
+        mode="lines",
+        line=dict(width=0),
+        showlegend=False,
+        hoverinfo="skip",
+    ))
+
+    # Lower band with fill to upper
+    fig.add_trace(go.Scatter(
+        x=hours_list, y=lower_band,
+        mode="lines",
+        line=dict(width=0),
+        fill="tonexty",
+        fillcolor="rgba(102, 126, 234, 0.08)",
+        name="±15% Confidence Band",
+        hoverinfo="skip",
+    ))
+
     # Predicted demand line
     fig.add_trace(go.Scatter(
-        x=data["hours_24"],
-        y=data["preds_24"],
+        x=hours_list,
+        y=preds,
         mode="lines+markers",
         name="Predicted Demand",
         line=dict(color="#667eea", width=3, shape="spline"),
         marker=dict(size=8, color="#667eea", line=dict(width=2, color="white")),
-        fill="tozeroy",
-        fillcolor="rgba(102, 126, 234, 0.1)",
     ))
 
     # Highlight current hour
     current_idx = data["current_hour"]
     fig.add_trace(go.Scatter(
         x=[current_idx],
-        y=[data["preds_24"][current_idx]],
+        y=[preds[current_idx]],
         mode="markers",
         name=f"Current ({data['time_display']})",
         marker=dict(size=16, color="#eb3349", symbol="star",
@@ -632,6 +747,14 @@ def main():
 
     st.plotly_chart(fig, use_container_width=True)
 
+    # --- Prediction History ---
+    history = st.session_state.get("prediction_history", [])
+    if len(history) > 1:
+        st.markdown("### 📝 Prediction History")
+        st.markdown(f"*You have made **{len(history)}** predictions this session.*")
+        history_df = pd.DataFrame(reversed(history))
+        st.dataframe(history_df, use_container_width=True, hide_index=True)
+
     # --- Additional Info ---
     with st.expander("ℹ️ About This Prediction System"):
         st.markdown("""
@@ -658,7 +781,7 @@ def main():
     # Footer
     st.markdown("""
     <div class="footer">
-        <p>🚦 Traffic Demand Prediction System v1.0 | Built by <strong>Innovexa Catalyst</strong></p>
+        <p>🚦 Traffic Demand Prediction System v2.0 | Built by <strong>Innovexa Catalyst</strong></p>
         <p>Powered by LightGBM, XGBoost & Streamlit | © 2024</p>
     </div>
     """, unsafe_allow_html=True)

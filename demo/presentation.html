@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Demand Prediction System — Demo Video</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a1a;
+            --purple: #667eea;
+            --violet: #764ba2;
+            --pink: #f093fb;
+            --green: #43e97b;
+            --cyan: #38f9d7;
+            --red: #f5576c;
+            --blue: #4facfe;
+            --text: #e0e0e0;
+            --muted: #6a7a94;
+            --card: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* ── Progress Bar ── */
+        .progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--purple), var(--violet), var(--pink));
+            z-index: 1000;
+            transition: width 0.5s linear;
+            box-shadow: 0 0 10px rgba(102,126,234,0.5);
+        }
+
+        /* ── Controls ── */
+        .controls {
+            position: fixed;
+            bottom: 24px;
+            right: 30px;
+            z-index: 1000;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .controls button {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: var(--text);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .controls button:hover { background: rgba(102,126,234,0.2); border-color: var(--purple); }
+        .controls .time { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+
+        /* ── Slide Container ── */
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.9s ease, transform 0.9s ease;
+            padding: 50px 70px;
+            pointer-events: none;
+        }
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* ── Backgrounds ── */
+        .bg-title { background: radial-gradient(ellipse at 30% 50%, rgba(102,126,234,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 50%, rgba(118,75,162,0.1) 0%, transparent 60%), var(--bg); }
+        .bg-data { background: radial-gradient(ellipse at 50% 30%, rgba(79,172,254,0.08) 0%, transparent 60%), var(--bg); }
+        .bg-feat { background: radial-gradient(ellipse at 40% 60%, rgba(118,75,162,0.1) 0%, transparent 60%), var(--bg); }
+        .bg-pipe { background: radial-gradient(ellipse at 60% 40%, rgba(102,126,234,0.1) 0%, transparent 60%), var(--bg); }
+        .bg-results { background: radial-gradient(ellipse at 50% 50%, rgba(67,233,123,0.06) 0%, transparent 60%), var(--bg); }
+        .bg-metrics { background: radial-gradient(ellipse at 30% 70%, rgba(67,233,123,0.08) 0%, transparent 60%), var(--bg); }
+        .bg-demo1 { background: radial-gradient(ellipse at 50% 40%, rgba(245,87,108,0.08) 0%, transparent 60%), var(--bg); }
+        .bg-demo2 { background: radial-gradient(ellipse at 50% 40%, rgba(79,172,254,0.08) 0%, transparent 60%), var(--bg); }
+        .bg-demo3 { background: radial-gradient(ellipse at 50% 40%, rgba(240,147,251,0.08) 0%, transparent 60%), var(--bg); }
+        .bg-code { background: radial-gradient(ellipse at 40% 50%, rgba(102,126,234,0.08) 0%, transparent 60%), var(--bg); }
+        .bg-end { background: radial-gradient(ellipse at 50% 50%, rgba(102,126,234,0.12) 0%, transparent 50%), radial-gradient(ellipse at 30% 70%, rgba(118,75,162,0.08) 0%, transparent 50%), var(--bg); }
+
+        /* ── Particles ── */
+        .particles { position: absolute; top:0; left:0; width:100%; height:100%; overflow:hidden; z-index:0; }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(102,126,234,0.25);
+            animation: floatUp 18s infinite linear;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity:0; }
+            10% { opacity:0.6; transform: translateY(90vh) scale(1); }
+            90% { opacity:0.4; }
+            100% { transform: translateY(-10vh) scale(0.5); opacity:0; }
+        }
+
+        .content { position: relative; z-index: 1; text-align: center; width: 100%; max-width: 1100px; }
+
+        /* ── Typography ── */
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2));
+            border: 1px solid rgba(102,126,234,0.3);
+            padding: 7px 22px;
+            border-radius: 30px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--purple);
+            margin-bottom: 24px;
+        }
+
+        .main-title {
+            font-size: 4.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 40%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+            margin-bottom: 18px;
+        }
+
+        .section-title {
+            font-size: 2.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--purple), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .section-sub {
+            font-size: 1.05rem;
+            color: var(--muted);
+            max-width: 650px;
+            margin: 0 auto 36px;
+            line-height: 1.6;
+        }
+
+        .subtitle {
+            font-size: 1.35rem;
+            color: #8892b0;
+            max-width: 700px;
+            margin: 0 auto 36px;
+            line-height: 1.6;
+        }
+
+        /* ── Tech Tags ── */
+        .tags { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+        .tag {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            padding: 7px 18px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            color: #a8b2d1;
+            font-weight: 500;
+        }
+
+        /* ── Stat Cards ── */
+        .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 22px; margin: 28px 0; }
+        .stat {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px 18px;
+        }
+        .stat .icon { font-size: 2.2rem; margin-bottom: 10px; }
+        .stat .val {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--purple), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat .lbl {
+            font-size: 0.72rem; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 1.5px;
+            margin-top: 6px; font-weight: 700;
+        }
+
+        /* ── Feature Cards ── */
+        .features { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin: 28px 0; }
+        .feat {
+            background: linear-gradient(145deg, rgba(102,126,234,0.08), rgba(118,75,162,0.04));
+            border: 1px solid rgba(102,126,234,0.15);
+            border-radius: 14px;
+            padding: 22px 14px;
+        }
+        .feat .icon { font-size: 1.8rem; margin-bottom: 8px; }
+        .feat .name { font-weight: 700; font-size: 0.82rem; color: #c8d6e5; margin-bottom: 5px; }
+        .feat .desc { font-size: 0.68rem; color: var(--muted); line-height: 1.5; }
+
+        .formula {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(102,126,234,0.2);
+            border-radius: 12px;
+            padding: 18px 28px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--green);
+            max-width: 750px;
+            margin: 18px auto 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Pipeline Flow ── */
+        .pipeline { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 28px 0; flex-wrap: wrap; }
+        .pipe-box {
+            background: linear-gradient(145deg, rgba(102,126,234,0.1), rgba(118,75,162,0.05));
+            border: 1px solid rgba(102,126,234,0.2);
+            border-radius: 14px;
+            padding: 20px 22px;
+            min-width: 130px;
+        }
+        .pipe-box .icon { font-size: 1.5rem; margin-bottom: 6px; }
+        .pipe-box .label { font-weight: 700; font-size: 0.82rem; color: #c8d6e5; }
+        .pipe-box .sub { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
+        .pipe-arrow { font-size: 1.3rem; color: var(--purple); animation: arrowPulse 2s ease infinite; }
+        @keyframes arrowPulse { 0%,100%{opacity:0.3;transform:translateX(0)} 50%{opacity:1;transform:translateX(3px)} }
+
+        /* ── R2 Bars ── */
+        .bars { max-width: 820px; margin: 0 auto; }
+        .bar-row { display: flex; align-items: center; gap: 14px; margin: 16px 0; }
+        .bar-label { min-width: 150px; text-align: left; font-weight: 600; font-size: 0.92rem; color: #a8b2d1; }
+        .bar-track { flex: 1; height: 10px; background: rgba(255,255,255,0.06); border-radius: 5px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 5px; width: 0; transition: width 2s cubic-bezier(0.4,0,0.2,1); }
+        .bar-fill.rf { background: linear-gradient(90deg, var(--purple), var(--violet)); }
+        .bar-fill.xgb { background: linear-gradient(90deg, var(--pink), var(--red)); }
+        .bar-fill.lgbm { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .bar-fill.ens { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+        .bar-value { min-width: 80px; text-align: right; font-weight: 800; font-size: 1.1rem; }
+        .bar-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: #fff; padding: 3px 12px; border-radius: 10px;
+            font-size: 0.7rem; font-weight: 700;
+        }
+
+        /* ── Metrics Table ── */
+        .metrics-table { width:100%; border-collapse:separate; border-spacing:0 6px; }
+        .metrics-table th {
+            padding: 12px 18px; text-align:left; font-size:0.72rem;
+            text-transform:uppercase; letter-spacing:1.5px; color:var(--purple);
+            font-weight:700; border-bottom:2px solid rgba(102,126,234,0.2);
+        }
+        .metrics-table td { padding:14px 18px; background:rgba(255,255,255,0.03); font-size:0.95rem; }
+        .metrics-table tr td:first-child { border-radius:10px 0 0 10px; font-weight:700; }
+        .metrics-table tr td:last-child { border-radius:0 10px 10px 0; }
+        .metrics-table tr.hl td {
+            background: linear-gradient(135deg, rgba(67,233,123,0.08), rgba(56,249,215,0.05));
+            border-top:1px solid rgba(67,233,123,0.15); border-bottom:1px solid rgba(67,233,123,0.15);
+        }
+
+        /* ── Demo Scenario Cards ── */
+        .scenario { display:flex; gap:30px; align-items:center; text-align:left; max-width:900px; margin:0 auto; }
+        .scenario-inputs, .scenario-outputs { flex:1; }
+        .sc-title { font-size:1.1rem; font-weight:700; margin-bottom:16px; }
+        .sc-item { display:flex; align-items:center; gap:10px; padding:8px 0; font-size:0.92rem; color:#a8b2d1; }
+        .sc-item .ic { font-size:1.2rem; }
+        .sc-big {
+            font-size: 4.5rem; font-weight: 900; line-height: 1;
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .sc-unit { font-size: 0.85rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .sc-badge-high { display:inline-block; background:linear-gradient(135deg,#f5576c,#ff6b6b); color:#fff; padding:5px 16px; border-radius:10px; font-size:0.78rem; font-weight:700; }
+        .sc-badge-med { display:inline-block; background:linear-gradient(135deg,#ffa726,#fb8c00); color:#fff; padding:5px 16px; border-radius:10px; font-size:0.78rem; font-weight:700; }
+        .sc-badge-low { display:inline-block; background:linear-gradient(135deg,var(--green),var(--cyan)); color:#0a0a1a; padding:5px 16px; border-radius:10px; font-size:0.78rem; font-weight:700; }
+
+        /* ── Code Block ── */
+        .code-block {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(102,126,234,0.15);
+            border-radius: 14px;
+            padding: 24px 30px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem;
+            color: #a8b2d1;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        .code-block .dir { color: var(--purple); font-weight: 700; }
+        .code-block .file { color: var(--muted); }
+        .code-block .comment { color: var(--green); }
+
+        /* ── Conclusion ── */
+        .big-num {
+            font-size: 8rem; font-weight: 900; line-height: 1;
+            background: linear-gradient(135deg, var(--green), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .checks { text-align:left; max-width:550px; margin:0 auto; }
+        .check { display:flex; align-items:center; gap:12px; padding:9px 0; font-size:0.95rem; color:#a8b2d1; }
+        .check .ci { color:var(--green); font-size:1.2rem; font-weight:700; }
+
+        /* ── Appear animations ── */
+        .appear { opacity:0; transform:translateY(25px); }
+        .slide.active .appear { animation: appearUp 0.7s ease forwards; }
+        .slide.active .appear.d1 { animation-delay: 0.15s; }
+        .slide.active .appear.d2 { animation-delay: 0.3s; }
+        .slide.active .appear.d3 { animation-delay: 0.45s; }
+        .slide.active .appear.d4 { animation-delay: 0.6s; }
+        .slide.active .appear.d5 { animation-delay: 0.75s; }
+        .slide.active .appear.d6 { animation-delay: 0.9s; }
+        .slide.active .appear.d7 { animation-delay: 1.05s; }
+        @keyframes appearUp { to { opacity:1; transform:translateY(0); } }
+
+        /* ── Slide counter ── */
+        .slide-info {
+            position: fixed; top: 20px; right: 30px;
+            font-size: 0.78rem; color: rgba(255,255,255,0.25); font-weight: 600; z-index: 100;
+        }
+        .section-label {
+            position: fixed; top: 20px; left: 30px;
+            font-size: 0.72rem; color: var(--purple); font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+<div class="slide-info" id="slideInfo">1 / 11</div>
+<div class="section-label" id="sectionLabel">INTRODUCTION</div>
+<div class="controls">
+    <span class="time" id="timer">0:00 / 7:00</span>
+    <button id="playBtn" onclick="togglePlay()">&#9654; Play</button>
+    <button onclick="prevSlide()">&#9664;</button>
+    <button onclick="nextSlide()">&#9654;</button>
+</div>
+
+<!-- ══════════════ SLIDE 1: TITLE ══════════════ -->
+<div class="slide bg-title active" data-duration="30" data-section="INTRODUCTION">
+    <div class="particles" id="p1"></div>
+    <div class="content">
+        <div class="badge appear">Innovexa Catalyst</div>
+        <div class="main-title appear d1">Traffic Demand<br>Prediction System</div>
+        <p class="subtitle appear d2">An industry-level ML pipeline achieving <strong style="color:#43e97b">98.39% R&sup2; accuracy</strong> using ensemble learning, deployed as an interactive Streamlit web application.</p>
+        <div class="tags appear d3">
+            <span class="tag">Python 3.11</span>
+            <span class="tag">LightGBM</span>
+            <span class="tag">XGBoost</span>
+            <span class="tag">Scikit-Learn</span>
+            <span class="tag">Streamlit</span>
+            <span class="tag">Plotly</span>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════ SLIDE 2: DATASET ══════════════ -->
+<div class="slide bg-data" data-duration="45" data-section="DATASET">
+    <div class="content">
+        <div class="section-title appear">Smart City Traffic Dataset</div>
+        <p class="section-sub appear d1">125,000+ synthetic records with realistic urban traffic patterns</p>
+        <div class="stats appear d2">
+            <div class="stat">
+                <div class="icon">📊</div>
+                <div class="val" data-count="125000">0</div>
+                <div class="lbl">Records</div>
+            </div>
+            <div class="stat">
+                <div class="icon">📋</div>
+                <div class="val" data-count="15">0</div>
+                <div class="lbl">Features</div>
+            </div>
+            <div class="stat">
+                <div class="icon">🌦️</div>
+                <div class="val" data-count="5">0</div>
+                <div class="lbl">Weather Types</div>
+            </div>
+            <div class="stat">
+                <div class="icon">🛣️</div>
+                <div class="val" data-count="4">0</div>
+                <div class="lbl">Road Types</div>
+            </div>
+        </div>
+        <p class="appear d3" style="color:var(--muted); font-size:0.85rem; margin-top:12px; line-height:1.7;">
+            <strong style="color:#a8b2d1;">Temporal:</strong> Hour, Day of Week &nbsp;|&nbsp;
+            <strong style="color:#a8b2d1;">Road:</strong> Type, Lanes, Signals &nbsp;|&nbsp;
+            <strong style="color:#a8b2d1;">Weather:</strong> Temp, Humidity, Rainfall &nbsp;|&nbsp;
+            <strong style="color:#a8b2d1;">Location:</strong> Geohash
+        </p>
+    </div>
+</div>
+
+<!-- ══════════════ SLIDE 3: FEATURES ══════════════ -->
+<div class="slide bg-feat" data-duration="45" data-section="FEATURE ENGINEERING">
+    <div class="content">
+        <div class="section-title appear">Feature Engineering</div>
+        <p class="section-sub appear d1">5 engineered features boosting predictive power</p>
+        <div class="features appear d2">
+            <div class="feat"><div class="icon">⏰</div><div class="name">Peak Hour Flag</div><div class="desc">Binary flag for rush hours (7–9 AM, 5–7 PM)</div></div>
+            <div class="feat"><div class="icon">📅</div><div class="name">Weekend Flag</div><div class="desc">Binary indicator for Saturday & Sunday</div></div>
+            <div class="feat"><div class="icon">🚛</div><div class="name">Traffic Density</div><div class="desc">Composite: lanes, signals, large vehicles</div></div>
+            <div class="feat"><div class="icon">🌧️</div><div class="name">Weather Impact</div><div class="desc">Composite: temp, humidity, rain, severity</div></div>
+            <div class="feat"><div class="icon">🚗</div><div class="name">Rush Hour Cat.</div><div class="desc">Morning / Evening / Off-peak category</div></div>
+        </div>
+        <div class="formula appear d3">
+            Traffic_Density = 0.4 &times; lanes + 0.3 &times; signals + 0.3 &times; large_vehicles<br>
+            Weather_Impact &nbsp;= 0.25 &times; temp + 0.25 &times; humidity + 0.35 &times; rain + 0.15 &times; severity
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════ SLIDE 4: PIPELINE ══════════════ -->
+<div class="slide bg-pipe" data-duration="45" data-section="ML PIPELINE">
+    <div class="content">
+        <div class="section-title appear">ML Pipeline Architecture</div>
+        <p class="section-sub appear d1">End-to-end modular pipeline with hyperparameter tuning</p>
+        <div class="pipeline appear d2">
+            <div class="pipe-box"><div class="icon">📥</div><div class="label">Data Gen</div><div class="sub">125K records</div></div>
+            <div class="pipe-arrow">&#10132;</div>
+            <div class="pipe-box"><div class="icon">🧹</div><div class="label">Preprocess</div><div class="sub">Clean & Encode</div></div>
+            <div class="pipe-arrow">&#10132;</div>
+            <div class="pipe-box"><div class="icon">⚙️</div><div class="label">Features</div><div class="sub">5 engineered</div></div>
+            <div class="pipe-arrow">&#10132;</div>
+            <div class="pipe-box"><div class="icon">🤖</div><div class="label">Training</div><div class="sub">3 models + tuning</div></div>
+            <div class="pipe-arrow">&#10132;</div>
+            <div class="pipe-box" style="border-color:rgba(67,233,123,0.3);"><div class="icon">🏆</div><div class="label" style="color:var(--green)">Ensemble</div><div class="sub">55% LGBM + 45% XGB</div></div>
+        </div>
+        <div class="appear d3" style="margin-top:30px;">
+            <p style="color:#a8b2d1; font-size:0.88rem; font-weight:600; margin-bottom:10px;">Hyperparameter Tuning: RandomizedSearchCV</p>
+            <div class="tags">
+                <span class="tag">RF: 30 iter &times; 3-fold CV</span>
+                <span class="tag">XGBoost: 40 iter &times; 3-fold CV</span>
+                <span class="tag">LightGBM: 40 iter &times; 3-fold CV</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════ SLIDE 5: RESULTS BARS ══════════════ -->
+<div class="slide bg-results" data-duration="35" data-section="RESULTS">
+    <div class="content">
+        <div class="section-title appear">Model Performance</div>
+        <p class="section-sub appear d1">All models exceed their R&sup2; accuracy thresholds</p>
+        <div class="bars appear d2" id="barsContainer">
+            <div class="bar-row">
+                <div class="bar-label">Random Forest</div>
+                <div class="bar-track"><div class="bar-fill rf" data-width="97.87"></div></div>
+                <div class="bar-value" style="color:var(--violet)">97.87%</div>
+                <span class="bar-badge">PASS &ge;85%</span>
+            </div>
+            <div class="bar-row">
+                <div class="bar-label">XGBoost</div>
+                <div class="bar-track"><div class="bar-fill xgb" data-width="98.37"></div></div>
+                <div class="bar-value" style="color:var(--red)">98.37%</div>
+                <span class="bar-badge">PASS &ge;93%</span>
+            </div>
+            <div class="bar-row">
+                <div class="bar-label">LightGBM</div>
+                <div class="bar-track"><div class="bar-fill lgbm" data-width="98.37"></div></div>
+                <div class="bar-value" style="color:var(--blue)">98.37%</div>
+                <span class="bar-badge">PASS &ge;95%</span>
+            </div>
+            <div class="bar-row" style="margin-top:24px; padding-top:16px; border-top:1px solid rgba(67,233,123,0.15);">
+                <div class="bar-label" style="color:var(--green); font-weight:800; font-size:1rem;">Ensemble</div>
+                <div class="bar-track" style="height:14px;"><div class="bar-fill ens" data-width="98.39" style="height:14px;"></div></div>
+                <div class="bar-value" style="color:var(--green); font-size:1.4rem;">98.39%</div>
+                <span class="bar-badge">PASS &ge;96%</span>
+            </div>
+        </div>
+        <div class="formula appear d3" style="margin-top:28px;">
+            Ensemble = 0.55 &times; LightGBM + 0.45 &times; XGBoost
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════ SLIDE 6: METRICS TABLE ══════════════ -->
+<div class="slide bg-metrics" data-duration="30" data-section="RESULTS">
+    <div class="content">
+        <div class="section-title appear">Detailed Evaluation Metrics</div>
+        <table class="metrics-table appear d1">
+            <thead><tr><th>Model</th><th>R&sup2; Score</th><th>RMSE</th><th>MAE</th><th>MAPE</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr><td>Random Forest</td><td>0.9787</td><td>16.66</td><td>9.80</td><td>7.96%</td><td><span class="bar-badge">PASS</span></td></tr>
+                <tr><td>XGBoost</td><td>0.9837</td><td>14.59</td><td>8.74</td><td>7.85%</td><td><span class="bar-badge">PASS</span></td></tr>
+                <tr><td>LightGBM</td><td>0.9837</td><td>14.58</td><td>8.76</td><td>8.14%</td><td><span class="bar-badge">PASS</span></td></tr>
+                <tr class="hl"><td style="color:var(--green);">&#9733; Ensemble</td><td style="color:var(--green);font-weight:800;">0.9839</td><td style="color:var(--green);font-weight:800;">14.49</td><td style="color:var(--green);font-weight:800;">8.67</td><td style="color:var(--green);font-weight:800;">7.81%</td><td><span class="bar-badge">BEST</span></td></tr>
+            </tbody>
+        </table>
+        <p class="appear d2" style="color:var(--muted); font-size:0.82rem; margin-top:18px;">
+            Evaluated on 25,000 held-out test samples &nbsp;|&nbsp; Train/Test: 80/20 &nbsp;|&nbsp; random_state = 42
+        </p>
+    </div>
+</div>
+
+<!-- ══════════════ SLIDE 7: DEMO SCENARIO 1 ══════════════ -->
+<div class="slide bg-demo1" data-duration="35" data-section="LIVE APP DEMO">
+    <div class="content">
+        <div class="section-title appear">Live Prediction: Scenario 1</div>
+        <p class="section-sub appear d1">Highway &bull; Clear Weather &bull; Monday 8:00 AM</p>
+        <div class="scenario appear d2">
+            <div class="scenario-inputs">
+                <div class="sc-title" style="color:var(--purple);">&#9881; Inputs</div>
+                <div class="sc-item"><span class="ic">📍</span> Location: Zone tdr_u2</div>
+                <div class="sc-item"><span class="ic">🛣️</span> Road Type: <strong>Highway</strong></div>
+                <div class="sc-item"><span class="ic">🌤️</span> Weather: <strong>Clear</strong></div>
+                <div class="sc-item"><span class="ic">📅</span> Day: <strong>Monday</strong></div>
+                <div class="sc-item"><span class="ic">⏰</span> Time: <strong>08:00 AM</strong></div>
+            </div>
+            <div class="scenario-outputs" style="text-align:center;">
+                <div class="sc-big" data-count="489">0</div>
+                <div class="sc-unit">Vehicles / Hour</div>
+                <div style="margin-top:18px;">
+                    <span class="sc-badge-high">HIGH CONGESTION — 61%</span>
+                </div>
+                <div style="margin-top:12px; font-size:0.85rem; color:#f5576c;">
+                    &#9888; Peak Traffic Alert: Expect heavy traffic in next 2 hours
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════ SLIDE 8: DEMO SCENARIO 2 ══════════════ -->
+<div class="slide bg-demo2" data-duration="35" data-section="LIVE APP DEMO">
+    <div class="content">
+        <div class="section-title appear">Live Prediction: Scenario 2</div>
+        <p class="section-sub appear d1">Residential &bull; Snow &bull; Sunday 2:00 PM</p>
+        <div class="scenario appear d2">
+            <div class="scenario-inputs">
+                <div class="sc-title" style="color:var(--blue);">&#9881; Inputs</div>
+                <div class="sc-item"><span class="ic">📍</span> Location: Zone tdr_u2</div>
+                <div class="sc-item"><span class="ic">🛣️</span> Road Type: <strong>Residential</strong></div>
+                <div class="sc-item"><span class="ic">🌨️</span> Weather: <strong>Snow</strong></div>
+                <div class="sc-item"><span class="ic">📅</span> Day: <strong>Sunday</strong></div>
+                <div class="sc-item"><span class="ic">⏰</span> Time: <strong>02:00 PM</strong></div>
+            </div>
+            <div class="scenario-outputs" style="text-align:center;">
+                <div class="sc-big" style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;" data-count="57">0</div>
+                <div class="sc-unit">Vehicles / Hour</div>
+                <div style="margin-top:18px;">
+                    <span class="sc-badge-med">MEDIUM CONGESTION — 6%</span>
+                </div>
+                <div style="margin-top:12px; font-size:0.85rem; color:var(--green);">
+                    &#10003; No Peak Traffic Alert
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════ SLIDE 9: DEMO SCENARIO 3 ══════════════ -->
+<div class="slide bg-demo3" data-duration="35" data-section="LIVE APP DEMO">
+    <div class="content">
+        <div class="section-title appear">Live Prediction: Scenario 3</div>
+        <p class="section-sub appear d1">Arterial &bull; Rain &bull; Friday 6:00 PM</p>
+        <div class="scenario appear d2">
+            <div class="scenario-inputs">
+                <div class="sc-title" style="color:var(--pink);">&#9881; Inputs</div>
+                <div class="sc-item"><span class="ic">📍</span> Location: Zone tdr_u2</div>
+                <div class="sc-item"><span class="ic">🛣️</span> Road Type: <strong>Arterial</strong></div>
+                <div class="sc-item"><span class="ic">🌧️</span> Weather: <strong>Rain</strong></div>
+                <div class="sc-item"><span class="ic">📅</span> Day: <strong>Friday</strong></div>
+                <div class="sc-item"><span class="ic">⏰</span> Time: <strong>06:00 PM</strong></div>
+            </div>
+            <div class="scenario-outputs" style="text-align:center;">
+                <div class="sc-big" style="background:linear-gradient(135deg,var(--pink),var(--red));-webkit-background-clip:text;" data-count="342">0</div>
+                <div class="sc-unit">Vehicles / Hour</div>
+                <div style="margin-top:18px;">
+                    <span class="sc-badge-high">HIGH CONGESTION — 42%</span>
+                </div>
+                <div style="margin-top:12px; font-size:0.85rem; color:#f5576c;">
+                    &#9888; Peak Traffic Alert: Evening rush + adverse weather
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════ SLIDE 10: CODE TOUR ══════════════ -->
+<div class="slide bg-code" data-duration="30" data-section="CODEBASE">
+    <div class="content">
+        <div class="section-title appear">Modular Codebase</div>
+        <p class="section-sub appear d1">Clean, documented, PEP 8 compliant Python</p>
+        <div class="code-block appear d2">
+            <span class="dir">traffic-demand-prediction-system/</span><br>
+            <span class="dir">&nbsp;&nbsp;├── src/</span><br>
+            <span class="file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── generate_dataset.py</span> <span class="comment">&nbsp;# 125K synthetic records</span><br>
+            <span class="file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── data_preprocessing.py</span> <span class="comment"># Clean, encode, scale</span><br>
+            <span class="file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── feature_engineering.py</span> <span class="comment"># 5 engineered features</span><br>
+            <span class="file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── model_training.py</span> <span class="comment">&nbsp;&nbsp;&nbsp;# RF, XGB, LGBM + tuning</span><br>
+            <span class="file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── ensemble.py</span> <span class="comment">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 55/45 weighted blend</span><br>
+            <span class="file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── evaluate.py</span> <span class="comment">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Metrics + 6 plots</span><br>
+            <span class="dir">&nbsp;&nbsp;├── app/</span><br>
+            <span class="file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── streamlit_app.py</span> <span class="comment">&nbsp;&nbsp;&nbsp;# Interactive dashboard</span><br>
+            <span class="dir">&nbsp;&nbsp;├── notebooks/</span><br>
+            <span class="file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── EDA_and_modeling.py</span> <span class="comment">&nbsp;# 8-phase pipeline runner</span><br>
+            <span class="dir">&nbsp;&nbsp;├── models/</span> <span class="comment">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Serialized .pkl models</span><br>
+            <span class="dir">&nbsp;&nbsp;├── reports/</span> <span class="comment">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Docs + 6 EDA plots</span><br>
+            <span class="file">&nbsp;&nbsp;├── requirements.txt</span><br>
+            <span class="file">&nbsp;&nbsp;└── README.md</span>
+        </div>
+        <div class="tags appear d3" style="margin-top:24px;">
+            <span class="tag">GitHub: AbhinavSingh722/traffic-demand-prediction-system</span>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════ SLIDE 11: CONCLUSION ══════════════ -->
+<div class="slide bg-end" data-duration="30" data-section="CONCLUSION">
+    <div class="particles" id="p11"></div>
+    <div class="content">
+        <div class="big-num appear">98.39%</div>
+        <div class="section-title appear d1" style="margin-bottom:28px;">R&sup2; Accuracy Achieved</div>
+        <div class="checks appear d2">
+            <div class="check"><span class="ci">&#10003;</span> 125,000 records with 15+ features</div>
+            <div class="check"><span class="ci">&#10003;</span> 5 engineered features with domain knowledge</div>
+            <div class="check"><span class="ci">&#10003;</span> 3 models with hyperparameter tuning</div>
+            <div class="check"><span class="ci">&#10003;</span> Weighted ensemble exceeds 96% R&sup2; target</div>
+            <div class="check"><span class="ci">&#10003;</span> 6 EDA visualizations generated</div>
+            <div class="check"><span class="ci">&#10003;</span> Interactive Streamlit app deployed to cloud</div>
+            <div class="check"><span class="ci">&#10003;</span> Modular, documented, production-ready code</div>
+        </div>
+        <div class="appear d4" style="margin-top:36px;">
+            <div class="badge">Built by Innovexa Catalyst</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Particles
+function makeParticles(id, n=18) {
+    const c = document.getElementById(id);
+    if (!c) return;
+    for (let i=0; i<n; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random()*100+'%';
+        p.style.animationDelay = Math.random()*18+'s';
+        p.style.animationDuration = (12+Math.random()*10)+'s';
+        const s = 2+Math.random()*4;
+        p.style.width = p.style.height = s+'px';
+        c.appendChild(p);
+    }
+}
+makeParticles('p1', 22);
+makeParticles('p11', 22);
+
+// Slides
+const slides = document.querySelectorAll('.slide');
+const progressBar = document.getElementById('progressBar');
+const slideInfo = document.getElementById('slideInfo');
+const sectionLabel = document.getElementById('sectionLabel');
+const timerEl = document.getElementById('timer');
+const playBtn = document.getElementById('playBtn');
+
+let current = 0;
+let playing = false;
+let slideTimer = null;
+let elapsed = 0;
+let totalDuration = 0;
+slides.forEach(s => totalDuration += parseInt(s.dataset.duration));
+
+function formatTime(s) { return Math.floor(s/60)+':'+(s%60<10?'0':'')+Math.floor(s%60); }
+
+function updateUI() {
+    slideInfo.textContent = (current+1)+' / '+slides.length;
+    sectionLabel.textContent = slides[current].dataset.section || '';
+    const cumul = Array.from(slides).slice(0, current).reduce((a,s)=>a+parseInt(s.dataset.duration),0);
+    progressBar.style.width = ((cumul/totalDuration)*100)+'%';
+}
+
+function goTo(i) {
+    if (i<0||i>=slides.length) { if(playing){playing=false;playBtn.innerHTML='&#9654; Play';} return; }
+    slides[current].classList.remove('active');
+    current = i;
+    slides[current].classList.add('active');
+    updateUI();
+    triggerSlideEffects();
+    if (playing) scheduleNext();
+}
+
+function nextSlide() { goTo(current+1); }
+function prevSlide() { goTo(current-1); }
+
+function togglePlay() {
+    playing = !playing;
+    playBtn.innerHTML = playing ? '&#10074;&#10074; Pause' : '&#9654; Play';
+    if (playing) scheduleNext();
+    else clearTimeout(slideTimer);
+}
+
+function scheduleNext() {
+    clearTimeout(slideTimer);
+    const dur = parseInt(slides[current].dataset.duration) * 1000;
+    slideTimer = setTimeout(()=>{ if(playing) nextSlide(); }, dur);
+}
+
+// Counter animation
+function animateCount(el, target, dur=1500) {
+    const start = performance.now();
+    const fmt = target >= 1000;
+    function tick(now) {
+        const p = Math.min((now-start)/dur, 1);
+        const ease = 1-Math.pow(1-p, 3);
+        const v = Math.round(ease * target);
+        el.textContent = fmt ? v.toLocaleString() : v;
+        if (p<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+}
+
+// Slide-specific effects
+function triggerSlideEffects() {
+    // Counters
+    slides[current].querySelectorAll('[data-count]').forEach(el => {
+        animateCount(el, parseInt(el.dataset.count));
+    });
+    // R2 Bars
+    if (current === 4) {
+        setTimeout(()=>{
+            slides[current].querySelectorAll('.bar-fill').forEach((b,i) => {
+                setTimeout(()=>{ b.style.width = b.dataset.width+'%'; }, i*300);
+            });
+        }, 600);
+    }
+}
+
+// Timer update
+setInterval(()=>{
+    if (!playing) return;
+    elapsed += 0.5;
+    const cumul = Array.from(slides).slice(0, current).reduce((a,s)=>a+parseInt(s.dataset.duration),0);
+    timerEl.textContent = formatTime(cumul) + ' / ' + formatTime(totalDuration);
+}, 500);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+    if (e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); nextSlide(); }
+    if (e.key==='ArrowLeft') { e.preventDefault(); prevSlide(); }
+    if (e.key==='p'||e.key==='P') togglePlay();
+});
+
+// Init
+updateUI();
+triggerSlideEffects();
+</script>
+
+</body>
+</html>

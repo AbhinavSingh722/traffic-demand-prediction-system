@@ -1,0 +1,109 @@
+# Traffic Demand Prediction System - Configuration
+# ================================================
+# Centralised configuration for all hyperparameters, thresholds, and settings.
+
+# ---------------------------------------------------------------------------
+# Ensemble Configuration
+# ---------------------------------------------------------------------------
+ensemble:
+  lgbm_weight: 0.55
+  xgb_weight: 0.45
+  formula: "prediction = 0.55 * LightGBM + 0.45 * XGBoost"
+
+# ---------------------------------------------------------------------------
+# Feature Engineering Constants
+# ---------------------------------------------------------------------------
+features:
+  peak_hours: [7, 8, 9, 17, 18, 19]
+  morning_rush: [7, 8, 9]
+  evening_rush: [17, 18, 19]
+  weekend_days: ["Saturday", "Sunday"]
+  comfort_temp: 22.0
+
+  weather_severity:
+    Clear: 0.0
+    Cloudy: 0.3
+    Fog: 0.5
+    Rain: 0.7
+    Snow: 1.0
+
+  traffic_density_weights:
+    lanes: 0.4
+    signals: 0.3
+    large_vehicles: 0.3
+
+  weather_impact_weights:
+    temperature: 0.25
+    humidity: 0.25
+    rainfall: 0.35
+    severity: 0.15
+
+# ---------------------------------------------------------------------------
+# Model Training Hyperparameter Search Spaces
+# ---------------------------------------------------------------------------
+training:
+  test_size: 0.2
+  random_state: 42
+  cv_folds: 3
+
+  random_forest:
+    n_iter: 30
+    param_grid:
+      n_estimators: [100, 200, 300]
+      max_depth: [null, 10, 20, 30]
+      min_samples_split: [2, 5, 10]
+      min_samples_leaf: [1, 2, 4]
+      max_features: [0.5, 0.7, 1.0]
+
+  xgboost:
+    n_iter: 40
+    param_grid:
+      n_estimators: [300, 500, 800]
+      max_depth: [4, 6, 8]
+      learning_rate: [0.01, 0.03, 0.05, 0.1]
+      subsample: [0.7, 0.8, 0.9]
+      colsample_bytree: [0.7, 0.8, 0.9]
+      reg_alpha: [0, 0.1, 0.5]
+      reg_lambda: [0.5, 1.0, 2.0]
+
+  lightgbm:
+    n_iter: 40
+    param_grid:
+      n_estimators: [500, 800, 1200]
+      max_depth: [6, 8, 12, -1]
+      learning_rate: [0.01, 0.03, 0.05]
+      num_leaves: [31, 50, 80]
+      subsample: [0.7, 0.8, 0.9]
+      colsample_bytree: [0.7, 0.8, 0.9]
+      reg_alpha: [0, 0.1, 0.5]
+      reg_lambda: [0.5, 1.0, 2.0]
+
+# ---------------------------------------------------------------------------
+# R-squared Performance Thresholds
+# ---------------------------------------------------------------------------
+thresholds:
+  random_forest: 0.85
+  xgboost: 0.93
+  lightgbm: 0.95
+  ensemble: 0.96
+
+# ---------------------------------------------------------------------------
+# Congestion Level Definitions
+# ---------------------------------------------------------------------------
+congestion:
+  low_label: "Low"
+  medium_label: "Medium"
+  high_label: "High"
+  low_threshold: "demand_q25"   # Below 25th percentile
+  high_threshold: "demand_q75"  # Above 75th percentile
+
+# ---------------------------------------------------------------------------
+# Dataset Generation
+# ---------------------------------------------------------------------------
+dataset:
+  n_records: 125000
+  output_path: "data/smart_city_traffic.csv"
+  geohash_zones: ["tdr_u2", "tdr_u3", "tdr_u4", "tdr_u5", "tdr_u6",
+                   "tdr_u7", "tdr_u8", "tdr_u9", "tdr_v1", "tdr_v2"]
+  road_types: ["Highway", "Arterial", "Residential", "Collector"]
+  weather_conditions: ["Clear", "Cloudy", "Rain", "Snow", "Fog"]

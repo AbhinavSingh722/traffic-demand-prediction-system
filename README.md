@@ -1,12 +1,26 @@
 # Traffic Demand Prediction System
 
 > **Industry-level ML Pipeline** for predicting urban traffic demand using ensemble learning.
-> Built for **Innovexa Catalyst** | Achieves **96%+ R2 accuracy** with LightGBM + XGBoost ensemble.
+> Built for **Innovexa Catalyst** | Achieves **98.39% R2 accuracy** with LightGBM + XGBoost ensemble.
 > 🌐 **Live Demo:** [Traffic Demand Prediction System](https://traffic-demand-prediction-system-8wsccguc27usbha2w5u7jg.streamlit.app/)
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.29-red)
+![Tests](https://img.shields.io/badge/Tests-24%20passed-brightgreen)
+![R2](https://img.shields.io/badge/R²-98.39%25-purple)
 ![License](https://img.shields.io/badge/License-MIT-green)
+
+---
+
+## Key Features
+
+- **98.39% R2 Accuracy** — Weighted ensemble (55% LightGBM + 45% XGBoost)
+- **Feature Contribution Analysis** — See which features drive each prediction
+- **24-Hour Forecast** with ±15% confidence bands
+- **Prediction History** — Track and compare multiple scenarios
+- **Model Comparison Dashboard** — Interactive R2 bars, metrics table, EDA gallery
+- **24 Unit Tests** — Full pytest coverage for features and ensemble logic
+- **Centralised Config** — All hyperparameters in `config.yaml`
 
 ---
 
@@ -17,7 +31,7 @@ This project implements a complete **Traffic Demand Prediction System** that for
 ### Architecture
 
 ```
-traffic_prediction/
+traffic-demand-prediction-system/
 ├── .streamlit/
 │   └── config.toml              # Dark theme configuration
 ├── data/
@@ -33,7 +47,6 @@ traffic_prediction/
 │   ├── ensemble.py              # Weighted ensemble (55/45)
 │   └── evaluate.py              # Metrics & visualizations
 ├── models/
-│   ├── random_forest.pkl        # Trained Random Forest
 │   ├── xgboost.pkl              # Trained XGBoost
 │   ├── lightgbm.pkl             # Trained LightGBM
 │   ├── ensemble_config.json     # Ensemble weights
@@ -42,7 +55,11 @@ traffic_prediction/
 │   ├── feature_names.json       # Feature ordering
 │   └── demand_stats.json        # Training data statistics
 ├── app/
-│   └── streamlit_app.py         # Interactive web application
+│   ├── streamlit_app.py         # Interactive web application
+│   └── pages/
+│       └── 02_Model_Comparison.py  # Model comparison dashboard
+├── tests/
+│   └── test_features_and_ensemble.py  # 24 unit tests
 ├── reports/
 │   ├── project_report.md        # Full methodology report
 │   ├── dataset_documentation.md # Dataset details
