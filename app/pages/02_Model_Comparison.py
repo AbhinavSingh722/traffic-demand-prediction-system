@@ -27,22 +27,55 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
 
-    /* Rename sidebar nav */
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0a0820 0%, #12112a 50%, #0f0c29 100%);
+        border-right: 1px solid rgba(102,126,234,0.1);
+    }
+
+    /* Nav links - 3D card */
+    [data-testid="stSidebarNav"] {
+        background: linear-gradient(145deg, rgba(26,26,46,0.8), rgba(15,12,41,0.6));
+        border: 1px solid rgba(102,126,234,0.12);
+        border-radius: 14px;
+        padding: 8px !important;
+        margin: 8px 12px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    [data-testid="stSidebarNav"] li a {
+        border-radius: 10px !important;
+        transition: all 0.25s ease !important;
+    }
+    [data-testid="stSidebarNav"] li a:hover {
+        background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.1)) !important;
+        box-shadow: 0 2px 8px rgba(102,126,234,0.15) !important;
+    }
+    [data-testid="stSidebarNav"] li a[aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.15)) !important;
+        border: 1px solid rgba(102,126,234,0.25) !important;
+        box-shadow: 0 4px 12px rgba(102,126,234,0.2), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+    }
+
+    /* Rename nav */
     [data-testid="stSidebarNav"] li:first-child span { font-size: 0 !important; }
     [data-testid="stSidebarNav"] li:first-child span::after {
         content: "🚦 Traffic Predictor"; font-size: 0.875rem; font-weight: 600;
     }
     [data-testid="stSidebarNav"] span { font-weight: 600 !important; }
 
-    /* Sidebar background */
-    [data-testid="stSidebar"] { background: linear-gradient(180deg, #0f0c29 0%, #1a1a2e 100%); }
-
-    /* Separate deploy header from content */
+    /* Deploy header */
     header[data-testid="stHeader"] {
-        border-bottom: 1px solid rgba(102,126,234,0.15);
-        background: rgba(10,10,26,0.95) !important;
-        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(102,126,234,0.12);
+        background: linear-gradient(180deg, rgba(10,8,32,0.98), rgba(14,17,23,0.95)) !important;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
+    header[data-testid="stHeader"] button,
+    header[data-testid="stHeader"] [data-testid="stToolbar"] {
+        opacity: 0.7; transition: opacity 0.2s;
+    }
+    header[data-testid="stHeader"] button:hover,
+    header[data-testid="stHeader"] [data-testid="stToolbar"]:hover { opacity: 1; }
 
     /* Animated background */
     .stApp > header + div {
@@ -56,6 +89,26 @@ st.markdown("""
         100% { background-position: 0% 50%; }
     }
 
+    /* 3D glass sidebar card */
+    .sidebar-card {
+        background: linear-gradient(145deg, rgba(26,26,46,0.7), rgba(15,12,41,0.5));
+        border: 1px solid rgba(102,126,234,0.15);
+        border-radius: 14px;
+        padding: 16px;
+        margin: 8px 0;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05);
+        backdrop-filter: blur(8px);
+    }
+    .sidebar-card h4 {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 0 8px 0;
+        font-size: 0.85rem;
+    }
+    .sidebar-card p { color: #8892b0; font-size: 0.78rem; margin: 4px 0; line-height: 1.5; }
+    .sidebar-card .highlight { color: #43e97b; font-weight: 700; }
+
     .metric-box {
         background: linear-gradient(145deg, #1a1a2e, #16213e);
         border: 1px solid rgba(255,255,255,0.08);
@@ -63,6 +116,12 @@ st.markdown("""
         padding: 1.2rem;
         text-align: center;
         margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .metric-box:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     }
     .metric-box h3 { color: #667eea; margin: 0 0 0.3rem 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; }
     .metric-box .val { font-size: 2rem; font-weight: 800; margin: 0; }
@@ -72,23 +131,29 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# -- Sidebar Info --
+# -- Sidebar Info (3D Glass Cards) --
 with st.sidebar:
-    st.markdown("---")
-    st.markdown("### 📊 About This Page")
     st.markdown("""
-    Compare all 4 trained models:
-    - **Random Forest** (baseline)
-    - **XGBoost** (boosting)
-    - **LightGBM** (boosting)
-    - **Ensemble** (weighted blend)
-    """)
-    st.markdown("---")
+    <div class="sidebar-card">
+        <h4>📊 Model Comparison</h4>
+        <p>Compare all 4 trained models side by side:</p>
+        <p>• Random Forest <span style="color:#764ba2;">(baseline)</span></p>
+        <p>• XGBoost <span style="color:#f5576c;">(boosting)</span></p>
+        <p>• LightGBM <span style="color:#4facfe;">(boosting)</span></p>
+        <p>• Ensemble <span class="highlight">(weighted blend)</span></p>
+    </div>
+    """, unsafe_allow_html=True)
+
     st.markdown("""
-    <div style="text-align:center; color:#4a5568; font-size:0.75rem;">
-        <p><strong>Ensemble Formula</strong></p>
-        <p>55% LightGBM + 45% XGBoost</p>
-        <p>R² Accuracy: 98.39%</p>
+    <div class="sidebar-card">
+        <h4>🏆 Best Model</h4>
+        <p style="text-align:center;">
+            <span style="font-size:1.8rem; font-weight:800; color:#43e97b;">98.39%</span><br>
+            <span style="color:#6a7a94; font-size:0.72rem; text-transform:uppercase; letter-spacing:1px;">R² Accuracy</span>
+        </p>
+        <p style="text-align:center; margin-top:8px; color:#a8b2d1; font-size:0.75rem;">
+            55% LightGBM + 45% XGBoost
+        </p>
     </div>
     """, unsafe_allow_html=True)
 

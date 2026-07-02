@@ -167,7 +167,34 @@ st.markdown("""
 
     /* Sidebar styling */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f0c29 0%, #1a1a2e 100%);
+        background: linear-gradient(180deg, #0a0820 0%, #12112a 50%, #0f0c29 100%);
+        border-right: 1px solid rgba(102,126,234,0.1);
+    }
+
+    /* Nav links - 3D card style */
+    [data-testid="stSidebarNav"] {
+        background: linear-gradient(145deg, rgba(26,26,46,0.8), rgba(15,12,41,0.6));
+        border: 1px solid rgba(102,126,234,0.12);
+        border-radius: 14px;
+        padding: 8px !important;
+        margin: 8px 12px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    [data-testid="stSidebarNav"] li a {
+        border-radius: 10px !important;
+        transition: all 0.25s ease !important;
+    }
+
+    [data-testid="stSidebarNav"] li a:hover {
+        background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.1)) !important;
+        box-shadow: 0 2px 8px rgba(102,126,234,0.15) !important;
+    }
+
+    [data-testid="stSidebarNav"] li a[aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.15)) !important;
+        border: 1px solid rgba(102,126,234,0.25) !important;
+        box-shadow: 0 4px 12px rgba(102,126,234,0.2), inset 0 1px 0 rgba(255,255,255,0.05) !important;
     }
 
     /* Rename sidebar nav labels */
@@ -183,6 +210,7 @@ st.markdown("""
         font-weight: 600 !important;
     }
 
+    /* Sidebar labels */
     [data-testid="stSidebar"] .stSelectbox label,
     [data-testid="stSidebar"] .stDateInput label,
     [data-testid="stSidebar"] .stTimeInput label {
@@ -190,11 +218,33 @@ st.markdown("""
         font-weight: 500;
     }
 
-    /* Separate deploy header from content */
+    /* Sidebar section headings - 3D glass card */
+    [data-testid="stSidebar"] .stMarkdown h2 {
+        background: linear-gradient(145deg, rgba(102,126,234,0.12), rgba(118,75,162,0.08));
+        border: 1px solid rgba(102,126,234,0.15);
+        border-radius: 12px;
+        padding: 10px 14px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+        font-size: 0.95rem !important;
+    }
+
+    /* Deploy header - glass pill */
     header[data-testid="stHeader"] {
-        border-bottom: 1px solid rgba(102,126,234,0.15);
-        background: rgba(10,10,26,0.95) !important;
-        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(102,126,234,0.12);
+        background: linear-gradient(180deg, rgba(10,8,32,0.98), rgba(14,17,23,0.95)) !important;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    /* Style the deploy button as a pill */
+    header[data-testid="stHeader"] button,
+    header[data-testid="stHeader"] [data-testid="stToolbar"] {
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    header[data-testid="stHeader"] button:hover,
+    header[data-testid="stHeader"] [data-testid="stToolbar"]:hover {
+        opacity: 1;
     }
 
     /* Animated background gradient */
