@@ -34,13 +34,14 @@ st.markdown("""
     }
 
     /* Nav links - 3D card */
-    [data-testid="stSidebarNav"] {
+    [data-testid="stSidebarNav"] { background: none; border: none; box-shadow: none; padding: 0 !important; margin: 8px 12px !important; }
+    [data-testid="stSidebarNav"] ul {
         background: linear-gradient(145deg, rgba(26,26,46,0.8), rgba(15,12,41,0.6));
         border: 1px solid rgba(102,126,234,0.12);
         border-radius: 14px;
         padding: 8px !important;
-        margin: 8px 12px !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+        margin: 0 !important;
     }
     [data-testid="stSidebarNav"] li a {
         border-radius: 10px !important;
